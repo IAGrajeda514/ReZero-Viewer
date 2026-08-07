@@ -1,5 +1,4 @@
 import type { Book, Chapter } from '../types'
-import type { ReaderPageDefinition } from '../../reader/types'
 
 export const demoChapters: Chapter[] = [
   {
@@ -38,7 +37,11 @@ export const demoChapters: Chapter[] = [
         time: 'day', mood: 'neutral', ambience: { presetId: 'city-day' },
         intro: { title: 'CIUDAD DE VIDRIO', subtitle: 'Paseo central · Día' },
         blocks: [
-          { id: 'block-008', type: 'narration', text: 'Al amanecer, las torres devolvían el cielo en miles de reflejos azulados.' },
+          {
+            id: 'block-008',
+            type: 'narration',
+            text: 'Al amanecer, las torres devolvían el cielo en miles de reflejos azulados. Desde la terraza de la estación elevada, el viajero observó cómo cada fachada recogía una parte distinta de las nubes y la desplazaba hacia otra calle. Algunas ventanas mostraban un día despejado; otras conservaban todavía la tormenta de la noche anterior. Los tranvías avanzaban sin cables visibles y dejaban tras de sí una vibración tenue, semejante al sonido de una copa de cristal. En las plazas, los comerciantes abrían toldos color arena y colocaban brújulas, mapas plegables y frascos llenos de una luz que parecía líquida. Nadie se detenía a mirar las imágenes imposibles de los edificios. Para los habitantes, una torre que reflejaba el mar en mitad de una ciudad interior era tan normal como el humo de las cocinas. El viajero descendió los escalones con el atlas protegido bajo el abrigo. Había intentado orientarse siguiendo las avenidas, pero el dibujo de las calles cambiaba cada vez que consultaba una superficie pulida. Una fuente indicaba el norte en su reflejo y el sur en la piedra. Un arco conducía a la plaza central cuando se cruzaba de frente, pero desembocaba junto al canal si alguien miraba hacia atrás. Después de perderse tres veces, comprendió que la ciudad no ocultaba sus caminos: simplemente ofrecía demasiados a la vez. Entonces distinguió a una figura inmóvil entre la multitud. Llevaba un tubo de mapas a la espalda y sostenía una lámina opaca, el único objeto de toda la avenida que no devolvía ninguna imagen.'
+          },
           { id: 'block-009', type: 'dialogue', characterId: 'character-002', speakerLabel: 'Cartógrafa', text: '—Si buscas la puerta, empieza por encontrar aquello que no se refleja.' },
           { id: 'block-010', type: 'dialogue', characterId: 'character-001', speakerLabel: 'Viajero', text: '—Eso suena más a acertijo que a indicación.' },
           { id: 'block-011', type: 'thought', characterId: 'character-001', text: 'Sin embargo, era la primera pista que había recibido.' },
@@ -54,7 +57,13 @@ export const demoChapters: Chapter[] = [
         intro: { title: 'PASAJE DE SERVICIO', subtitle: 'Distrito bajo · Tarde' },
         blocks: [
           { id: 'block-015', type: 'narration', text: 'El pasaje estrecho absorbía el ruido de la avenida hasta convertirlo en un murmullo lejano.' },
-          { id: 'block-016', type: 'dialogue', characterId: 'character-unknown', speakerLabel: 'Figura encapuchada', text: '—Han tardado demasiado. La marea ya está cambiando.' },
+          {
+            id: 'block-016',
+            type: 'dialogue',
+            characterId: 'character-unknown',
+            speakerLabel: 'Figura encapuchada',
+            text: '—Han tardado demasiado. La marea ya está cambiando y, cuando las campanas de la torre terminen su tercera vuelta, ninguna de las rutas que conocen seguirá en el mismo sitio. Escuchen con atención: deben cruzar el mercado sin mirar los escaparates, bajar por la escalera que parece subir y esperar junto a la puerta sin bisagras. No intenten abrirla. La puerta reconocerá el atlas y decidirá por ustedes. Si ven su propio reflejo antes de llegar, cierren los ojos y cuenten siete pasos; si escuchan una voz conocida, no respondan, aunque pronuncie un nombre que creían olvidado. La ciudad utiliza los recuerdos como señales y los coloca donde pueden causar más daño. Tal vez piensen que exagero, pero ya vi a otros seguir un camino construido con aquello que más deseaban recuperar. Ninguno regresó por la misma calle. Cuando alcancen el canal, busquen las luces que navegan contra la corriente. Solo una conserva una llama azul. Síganla hasta el puente occidental y mantengan el atlas cerrado. Hay mapas que cambian cuando son observados y destinos que únicamente existen mientras nadie intenta nombrarlos.'
+          },
           { id: 'block-017', type: 'thought', characterId: 'character-001', text: 'Otra voz sin rostro, y esta vez no había niebla donde ocultarse.' },
         ],
       },
@@ -96,16 +105,6 @@ export const demoBook: Book = {
   author: 'Contenido ficticio de demostración',
   chapters: demoChapters.map(({ id, title, order }) => ({ id, title, order })),
 }
-
-export const demoPages: ReaderPageDefinition[] = [
-  { id: 'page-001', chapterId: 'chapter-threshold', sceneId: 'scene-storm-platform', title: 'El tren fuera del horario', blockIds: ['block-001', 'block-002', 'block-003', 'block-004'] },
-  { id: 'page-002', chapterId: 'chapter-threshold', sceneId: 'scene-observatory', title: 'El mapa bajo la cúpula', blockIds: ['block-005', 'block-006', 'block-007'] },
-  { id: 'page-003', chapterId: 'chapter-glass-city', sceneId: 'scene-glass-promenade', title: 'La ciudad que devuelve el cielo', blockIds: ['block-008', 'block-009', 'block-010', 'block-011'] },
-  { id: 'page-004', chapterId: 'chapter-glass-city', sceneId: 'scene-glass-promenade', title: 'Aquello que no se refleja', blockIds: ['block-012', 'block-013', 'block-014'] },
-  { id: 'page-005', chapterId: 'chapter-glass-city', sceneId: 'scene-service-alley', title: 'El pasaje sin ecos', blockIds: ['block-015', 'block-016', 'block-017'] },
-  { id: 'page-006', chapterId: 'chapter-canal-lights', sceneId: 'scene-sunset-canal', title: 'Una ruta bajo el cobre', blockIds: ['block-018', 'block-019', 'block-020'] },
-  { id: 'page-007', chapterId: 'chapter-canal-lights', sceneId: 'scene-canal-night', title: 'Luces contra la corriente', blockIds: ['block-021', 'block-022', 'block-023', 'block-024'] },
-]
 
 export const demoSpeakerColors: Readonly<Record<string, string>> = {
   'character-001': '#68aef6',

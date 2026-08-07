@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { demoBook, demoChapters, demoPages, demoSpeakerColors } from '../content/demo/demoContent'
+import { demoBook, demoChapters, demoSpeakerColors } from '../content/demo/demoContent'
 import { Reader } from '../reader/Reader'
 import {
   getReaderPreferences,
@@ -22,7 +22,6 @@ function App() {
     <Reader
       book={demoBook}
       chapters={demoChapters}
-      pages={demoPages}
       speakerColors={demoSpeakerColors}
       preferences={preferences}
       onPreferencesChange={updatePreferences}
