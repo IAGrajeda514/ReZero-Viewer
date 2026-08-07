@@ -34,7 +34,6 @@ export function ChapterDrawer({
                 className={`chapter-item${isCurrent ? ' chapter-item--current' : ''}`}
                 type="button"
                 aria-current={isCurrent ? 'page' : undefined}
-                disabled={progress === null}
                 onClick={() => onSelect(chapter.id)}
               >
                 <span className="chapter-item__number">{String(chapter.order).padStart(2, '0')}</span>

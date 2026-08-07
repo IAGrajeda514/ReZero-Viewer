@@ -51,3 +51,32 @@ input:focus-visible,
 button:disabled {
   cursor: default;
 }
+
+.app-status {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.app-status__content h1 {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 32px;
+}
+
+.app-status__content p {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.app-status__content button {
+  margin-top: 22px;
+  padding: 10px 18px;
+  border: 1px solid var(--paper-border);
+  border-radius: 999px;
+  color: var(--text);
+  background: rgb(var(--paper-rgb) / 70%);
+  cursor: pointer;
+}

@@ -1,4 +1,4 @@
-/** A private book loaded by the reader engine. */
+/** Lightweight book metadata consumed by the reader and future library screens. */
 export interface Book {
   id: string
   title: string

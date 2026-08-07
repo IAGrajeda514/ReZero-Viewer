@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { flushSync } from 'react-dom'
 import type { Chapter } from '../../content/types'
-import { paginateChapters } from './paginateChapter'
+import { paginateChapter } from './paginateChapter'
 import type { PageMeasurementCandidate, ReaderPageModel } from './types'
 
 const RESIZE_DEBOUNCE_MS = 140
 const OVERFLOW_TOLERANCE_PX = 1
 
 interface AutomaticPaginationOptions {
-  chapters: Chapter[]
+  chapter: Chapter
   showSpeakerNames: boolean
   layoutKey: string
 }
@@ -23,7 +23,7 @@ interface AutomaticPaginationResult {
 }
 
 export function useAutomaticPagination({
-  chapters,
+  chapter,
   showSpeakerNames,
   layoutKey,
 }: AutomaticPaginationOptions): AutomaticPaginationResult {
@@ -32,6 +32,7 @@ export function useAutomaticPagination({
   const [measurementRevision, setMeasurementRevision] = useState(0)
   const [paginationRevision, setPaginationRevision] = useState(0)
   const [pages, setPages] = useState<ReaderPageModel[]>([])
+  const [paginatedChapterId, setPaginatedChapterId] = useState<string | null>(null)
   const [isRepaginating, setIsRepaginating] = useState(false)
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export function useAutomaticPagination({
 
   useEffect(() => {
     const host = measurementHostRef.current
-    if (!host || chapters.length === 0) return
+    if (!host) return
     let cancelled = false
     let calculationTimer: number | undefined
     setIsRepaginating(true)
@@ -83,9 +84,10 @@ export function useAutomaticPagination({
           return readingElement.scrollHeight <= readingElement.clientHeight + OVERFLOW_TOLERANCE_PX
         }
 
-        const nextPages = paginateChapters(chapters, fits)
+        const nextPages = paginateChapter(chapter, fits)
         if (cancelled) return
         setPages(nextPages)
+        setPaginatedChapterId(chapter.id)
         setPaginationRevision((revision) => revision + 1)
         setIsRepaginating(false)
       }, 0)
@@ -96,14 +98,19 @@ export function useAutomaticPagination({
       cancelled = true
       if (calculationTimer !== undefined) window.clearTimeout(calculationTimer)
     }
-  }, [chapters, layoutKey, measurementRevision, showSpeakerNames])
+  }, [chapter, layoutKey, measurementRevision, showSpeakerNames])
+
+  const activePages = paginatedChapterId === chapter.id ? pages : []
+  const activeMeasurementCandidate = measurementCandidate?.chapter.id === chapter.id
+    ? measurementCandidate
+    : null
 
   return {
-    pages,
-    isPreparing: pages.length === 0,
+    pages: activePages,
+    isPreparing: activePages.length === 0,
     isRepaginating,
     paginationRevision,
     measurementHostRef,
-    measurementCandidate,
+    measurementCandidate: activeMeasurementCandidate,
   }
 }

@@ -258,7 +258,3 @@ export function paginateChapter(chapter: Chapter, fits: PageFits): ReaderPageMod
   finishPage()
   return pages
 }
-
-export function paginateChapters(chapters: Chapter[], fits: PageFits): ReaderPageModel[] {
-  return chapters.flatMap((chapter) => paginateChapter(chapter, fits))
-}

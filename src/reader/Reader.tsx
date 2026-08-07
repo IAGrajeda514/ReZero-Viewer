@@ -24,10 +24,11 @@ type TransitionClass = '' | 'reader-page--exit-next' | 'reader-page--exit-previo
 
 interface ReaderProps {
   book: Book
-  chapters: Chapter[]
+  chapter: Chapter
   speakerColors?: Readonly<Record<string, string>>
   preferences: ReaderPreferences
   onPreferencesChange: (changes: Partial<ReaderPreferences>) => void
+  onChapterSelect: (chapterId: string) => void
 }
 
 interface ResolvedPage {
@@ -43,19 +44,21 @@ interface RuntimeContentAnchor {
   offset: number
 }
 
-function resolvePage(model: ReaderPageModel, chapters: Chapter[]): ResolvedPage {
-  const chapter = chapters.find((candidate) => candidate.id === model.chapterId)
-  const scene = chapter?.scenes.find((candidate) => candidate.id === model.activeSceneId)
-  if (!chapter || !scene) throw new Error(`Generated page ${model.id} references missing content.`)
+function resolvePage(model: ReaderPageModel, chapter: Chapter): ResolvedPage {
+  const scene = chapter.scenes.find((candidate) => candidate.id === model.activeSceneId)
+  if (model.chapterId !== chapter.id || !scene) {
+    throw new Error(`Generated page ${model.id} references missing content.`)
+  }
   return { model, chapter, scene }
 }
 
 export function Reader({
   book,
-  chapters,
+  chapter,
   speakerColors,
   preferences,
   onPreferencesChange,
+  onChapterSelect,
 }: ReaderProps) {
   const colorMap = speakerColors ?? EMPTY_SPEAKER_COLORS
   const resolveSpeakerColor = useCallback((characterId: string) => colorMap[characterId], [colorMap])
@@ -68,7 +71,7 @@ export function Reader({
     measurementHostRef,
     measurementCandidate,
   } = useAutomaticPagination({
-    chapters,
+    chapter,
     showSpeakerNames: preferences.showSpeakerNames,
     layoutKey,
   })
@@ -76,8 +79,8 @@ export function Reader({
   const { currentIndex, goTo } = usePagination(pages.length)
   const safeCurrentIndex = pages.length === 0 ? 0 : Math.min(currentIndex, pages.length - 1)
   const currentPage = useMemo(
-    () => pages.length > 0 ? resolvePage(pages[safeCurrentIndex], chapters) : null,
-    [chapters, pages, safeCurrentIndex],
+    () => pages.length > 0 ? resolvePage(pages[safeCurrentIndex], chapter) : null,
+    [chapter, pages, safeCurrentIndex],
   )
   const [openDrawer, setOpenDrawer] = useState<DrawerName>(null)
   const [isTransitioning, setIsTransitioning] = useState(false)
@@ -93,7 +96,9 @@ export function Reader({
   const previousSceneIdRef = useRef<string | null>(null)
   const hasRenderedPageRef = useRef(false)
   const storedProgressRef = useRef(getReadingProgress())
-  const initialProgress = storedProgressRef.current?.bookId === book.id ? storedProgressRef.current : null
+  const initialProgress = storedProgressRef.current?.bookId === book.id && storedProgressRef.current.chapterId === chapter.id
+    ? storedProgressRef.current
+    : null
   const contentAnchorRef = useRef<RuntimeContentAnchor | null>(initialProgress ? {
     chapterId: initialProgress.chapterId,
     sceneId: initialProgress.sceneId,
@@ -252,20 +257,14 @@ export function Reader({
   } as CSSProperties
 
   const progressForChapter = useCallback((chapterId: string): number | null => {
-    const chapterPageIndexes = pages
-      .map((page, index) => page.chapterId === chapterId ? index : -1)
-      .filter((index) => index >= 0)
-    if (chapterPageIndexes.length === 0) return null
-    if (safeCurrentIndex < chapterPageIndexes[0]) return 0
-    const reached = chapterPageIndexes.filter((index) => index <= safeCurrentIndex).length
-    return Math.round((reached / chapterPageIndexes.length) * 100)
-  }, [pages, safeCurrentIndex])
+    if (chapterId !== chapter.id || pages.length === 0) return null
+    return Math.round(((safeCurrentIndex + 1) / pages.length) * 100)
+  }, [chapter.id, pages.length, safeCurrentIndex])
 
   const selectChapter = useCallback((chapterId: string) => {
-    const targetIndex = pages.findIndex((page) => page.chapterId === chapterId)
     closeDrawers()
-    if (targetIndex >= 0) navigateTo(targetIndex)
-  }, [closeDrawers, navigateTo, pages])
+    if (chapterId !== chapter.id) onChapterSelect(chapterId)
+  }, [chapter.id, closeDrawers, onChapterSelect])
 
   return (
     <main
@@ -360,7 +359,7 @@ export function Reader({
 
       <ChapterDrawer
         chapters={book.chapters}
-        activeChapterId={currentPage?.chapter.id ?? ''}
+        activeChapterId={chapter.id}
         isOpen={openDrawer === 'chapters'}
         progressForChapter={progressForChapter}
         onSelect={selectChapter}
