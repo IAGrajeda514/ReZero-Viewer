@@ -1,0 +1,3 @@
+.page-navigation { display: flex; align-items: center; justify-content: center; gap: 1rem; }
+.page-navigation button, .chapter-drawer button, .reader-settings button { border: 1px solid var(--nv-border); border-radius: 0.5rem; padding: 0.5rem 0.75rem; color: inherit; background: rgb(255 255 255 / 6%); cursor: pointer; }
+.page-navigation button:disabled { cursor: not-allowed; opacity: 0.45; }

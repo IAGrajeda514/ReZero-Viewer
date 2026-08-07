@@ -1,0 +1,3 @@
+:root[data-theme="dark-immersive"] { --nv-background: #111318; --nv-surface: #1a1e26; --nv-text: #e8ebef; }
+:root[data-theme="night-sepia"] { --nv-background: #211b16; --nv-surface: #30271e; --nv-text: #f0e4cf; }
+:root[data-theme="light-atmospheric"] { --nv-background: #edf1f2; --nv-surface: #ffffff; --nv-text: #1e2930; --nv-muted-text: #5f6970; color-scheme: light; }
