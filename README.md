@@ -2,7 +2,7 @@
 
 NovelView is a private, immersive web reader for novels. The reader engine is deliberately independent from private book content.
 
-The project is currently in its **foundation** phase: the technical structure and data contracts exist, but the approved final reader design has not yet been integrated.
+The project currently includes the first React integration of the approved Reader V2 experience over the established foundation.
 
 ## Stack
 
@@ -29,12 +29,12 @@ npm run preview
 
 ```text
 src/
-├── app/          # Temporary application entry screen
-├── ambience/     # Ambient preset contracts and background base
-├── chapters/     # Chapter navigation placeholder
+├── app/          # Application composition
+├── ambience/     # Ambient presets and crossfade background
+├── chapters/     # Chapter navigation drawer
 ├── content/      # Generic book, chapter, scene, and block models
-├── reader/       # Reader placeholders and base hooks
-├── settings/     # Preferences placeholder
+├── reader/       # Reader experience, page rendering, and navigation hooks
+├── settings/     # Persistent reader settings drawer
 ├── storage/      # localStorage helpers
 └── styles/       # Base, reader, ambience, theme, and control CSS
 ```

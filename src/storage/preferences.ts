@@ -10,12 +10,14 @@ export interface ReaderPreferences {
   ambienceIntensity: number
   glassOpacity: number
   showSpeakerNames: boolean
+  wheelNavigation: boolean
   reducedMotion: boolean
 }
 
 export const DEFAULT_READER_PREFERENCES: ReaderPreferences = {
-  theme: 'dark-immersive', fontSize: 18, lineHeight: 1.7, readerWidth: 720,
-  ambienceIntensity: 0.7, glassOpacity: 0.7, showSpeakerNames: true, reducedMotion: false,
+  theme: 'dark-immersive', fontSize: 19, lineHeight: 1.72, readerWidth: 820,
+  ambienceIntensity: 1, glassOpacity: 0.7, showSpeakerNames: true,
+  wheelNavigation: true, reducedMotion: false,
 }
 
 function createDefaultPreferences(): ReaderPreferences {
@@ -34,6 +36,7 @@ function isReaderPreferences(value: unknown): value is ReaderPreferences {
     typeof preferences.ambienceIntensity === 'number' &&
     typeof preferences.glassOpacity === 'number' &&
     typeof preferences.showSpeakerNames === 'boolean' &&
+    typeof preferences.wheelNavigation === 'boolean' &&
     typeof preferences.reducedMotion === 'boolean'
   )
 }

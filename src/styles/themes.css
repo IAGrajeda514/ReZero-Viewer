@@ -1,3 +1,47 @@
-:root[data-theme="dark-immersive"] { --nv-background: #111318; --nv-surface: #1a1e26; --nv-text: #e8ebef; }
-:root[data-theme="night-sepia"] { --nv-background: #211b16; --nv-surface: #30271e; --nv-text: #f0e4cf; }
-:root[data-theme="light-atmospheric"] { --nv-background: #edf1f2; --nv-surface: #ffffff; --nv-text: #1e2930; --nv-muted-text: #5f6970; color-scheme: light; }
+.reader-app[data-theme="dark-immersive"] {
+  --bg: #070b10;
+  --bg-2: #0e151d;
+  --paper-rgb: 13 20 28;
+  --paper-border: rgb(255 255 255 / 7.5%);
+  --paper-highlight: rgb(255 255 255 / 7%);
+  --text: #f1eee8;
+  --muted: #a59e94;
+  --quiet: #6f7278;
+  --gold: #dfbd8b;
+  --gold-rgb: 223 189 139;
+  --speaker-unknown: #aeb4bc;
+  --shadow: 0 40px 120px rgb(0 0 0 / 52%);
+  color-scheme: dark;
+}
+
+.reader-app[data-theme="night-sepia"] {
+  --bg: #0d0a08;
+  --bg-2: #1a1410;
+  --paper-rgb: 27 22 18;
+  --paper-border: rgb(255 235 211 / 8%);
+  --paper-highlight: rgb(255 230 200 / 8%);
+  --text: #f1e7d8;
+  --muted: #b8aa99;
+  --quiet: #7f7368;
+  --gold: #e3bc82;
+  --gold-rgb: 227 188 130;
+  --speaker-unknown: #b8b0a6;
+  --shadow: 0 40px 120px rgb(0 0 0 / 55%);
+  color-scheme: dark;
+}
+
+.reader-app[data-theme="light-atmospheric"] {
+  --bg: #d8d8d2;
+  --bg-2: #eff0eb;
+  --paper-rgb: 247 246 241;
+  --paper-border: rgb(36 41 48 / 12%);
+  --paper-highlight: rgb(255 255 255 / 72%);
+  --text: #23262b;
+  --muted: #656a70;
+  --quiet: #888d93;
+  --gold: #8b6541;
+  --gold-rgb: 139 101 65;
+  --speaker-unknown: #68717c;
+  --shadow: 0 40px 100px rgb(42 46 52 / 18%);
+  color-scheme: light;
+}

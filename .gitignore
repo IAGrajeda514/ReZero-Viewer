@@ -15,6 +15,7 @@ dist-ssr
 # Private reading content must remain outside the reader engine repository.
 content-local/
 private-books/
+/references-local/
 *.pdf
 *.epub
 

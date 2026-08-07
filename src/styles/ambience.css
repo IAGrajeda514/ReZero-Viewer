@@ -1,3 +1,71 @@
-.ambient-background { position: fixed; z-index: -1; inset: 0; overflow: hidden; pointer-events: none; background: var(--ambience-background, var(--nv-background)); }
-.ambient-background::before { position: absolute; inset: -10%; content: ""; opacity: var(--ambience-intensity, 0.5); background: radial-gradient(circle at top, var(--ambience-lighting, transparent), transparent 55%); filter: blur(var(--ambience-blur, 0)); }
-.ambient-background::after { position: absolute; inset: 0; content: ""; background: radial-gradient(ellipse at center, transparent 45%, rgb(0 0 0 / var(--ambience-vignette, 0))); }
+.ambient-background {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--bg);
+  transition: filter 800ms ease;
+}
+
+.ambient-layer {
+  position: absolute;
+  inset: -8%;
+  opacity: 0;
+  transform: scale(1.05);
+  background: var(--ambient-layer-background);
+  transition: opacity 1200ms ease, transform 1500ms ease;
+  will-change: opacity, transform;
+}
+
+.ambient-layer--active {
+  opacity: var(--ambient-strength, 1);
+  transform: scale(1);
+}
+
+.ambient-layer::before,
+.ambient-layer::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.ambient-layer::before {
+  background: var(--ambient-layer-texture);
+  filter: blur(var(--ambient-layer-blur, 0));
+  transform: scale(1.04);
+}
+
+.ambient-layer::after {
+  background: var(--ambient-layer-shade);
+}
+
+.ambient-grain {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  opacity: 0.13;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.86' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.38'/%3E%3C/svg%3E");
+}
+
+.ambient-shade {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(0 0 0 / 8%), transparent 24%, rgb(0 0 0 / 22%));
+  transition: background 700ms ease;
+}
+
+.reader-app[data-theme="light-atmospheric"] .ambient-shade {
+  background: linear-gradient(180deg, rgb(255 255 255 / 8%), transparent 27%, rgb(30 35 42 / 10%));
+}
+
+.ambient-background[data-reduced-motion="true"] .ambient-layer {
+  transition-duration: 1ms;
+}
+
+@media (max-width: 640px) {
+  .ambient-grain { opacity: 0.08; }
+  .ambient-layer::before { filter: blur(min(var(--ambient-layer-blur, 0px), 10px)); }
+}

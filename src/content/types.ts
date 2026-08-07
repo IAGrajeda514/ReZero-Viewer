@@ -24,7 +24,13 @@ export interface Scene {
   time: SceneTime
   mood: SceneMood
   ambience?: SceneAmbience
+  intro?: SceneIntroduction
   blocks: ReaderBlock[]
+}
+
+export interface SceneIntroduction {
+  title: string
+  subtitle: string
 }
 
 export interface SceneLocation {

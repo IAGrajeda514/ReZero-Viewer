@@ -2,6 +2,8 @@ import type { SceneMood, SceneTime } from '../content/types'
 
 export interface AmbienceVisuals {
   background: string
+  texture: string
+  shade: string
   accent: string
   lighting: string
   vignette: number

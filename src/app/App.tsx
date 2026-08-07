@@ -1,10 +1,32 @@
+import { useCallback, useEffect, useState } from 'react'
+import { demoBook, demoChapters, demoPages, demoSpeakerColors } from '../content/demo/demoContent'
+import { Reader } from '../reader/Reader'
+import {
+  getReaderPreferences,
+  saveReaderPreferences,
+  type ReaderPreferences,
+} from '../storage/preferences'
+
 function App() {
+  const [preferences, setPreferences] = useState(getReaderPreferences)
+
+  useEffect(() => {
+    saveReaderPreferences(preferences)
+  }, [preferences])
+
+  const updatePreferences = useCallback((changes: Partial<ReaderPreferences>) => {
+    setPreferences((current) => ({ ...current, ...changes }))
+  }, [])
+
   return (
-    <main className="foundation-screen">
-      <p className="foundation-screen__eyebrow">NovelView</p>
-      <h1>Immersive Private Reader</h1>
-      <p>Reader engine ready.</p>
-    </main>
+    <Reader
+      book={demoBook}
+      chapters={demoChapters}
+      pages={demoPages}
+      speakerColors={demoSpeakerColors}
+      preferences={preferences}
+      onPreferencesChange={updatePreferences}
+    />
   )
 }
 
