@@ -45,10 +45,8 @@ export function getReaderPreferences(): ReaderPreferences {
   try {
     const stored = readStoredValue('readerPreferences')
     if (!stored) return createDefaultPreferences()
-    const parsed: unknown = JSON.parse(stored.serialized)
+    const parsed: unknown = JSON.parse(stored)
     if (!isReaderPreferences(parsed)) return createDefaultPreferences()
-
-    if (stored.source === 'legacy') saveReaderPreferences(parsed)
     return parsed
   } catch {
     return createDefaultPreferences()

@@ -1,13 +1,20 @@
 import { useState } from 'react'
+import type { Book } from '../content/types'
+import type { ReadingProgress } from '../storage/progress'
 import type { ReaderPreferences } from '../storage/preferences'
+import { ViewerChapterList } from './ViewerChapterList'
 import { ViewerSidebar } from './ViewerSidebar'
-import type { ViewerVolume } from './types'
+import type { ViewerVolume, ViewerVolumeLoadState } from './types'
 import './ReZeroHome.css'
 
 interface ReZeroHomeProps {
   preferences: ReaderPreferences
   volumes: readonly ViewerVolume[]
-  onOpenVolume?: (volume: ViewerVolume) => void
+  loadedBook: Book | null
+  loadState: ViewerVolumeLoadState
+  progress: ReadingProgress | null
+  onOpenVolume: (volume: ViewerVolume) => void
+  onOpenChapter: (chapterId: string) => void
 }
 
 function volumeMark(order: number): string {
@@ -18,13 +25,75 @@ function volumeStatus(volume: ViewerVolume): string {
   return volume.status === 'available' ? 'Disponible' : 'En preparación'
 }
 
-export function ReZeroHome({ preferences, volumes, onOpenVolume }: ReZeroHomeProps) {
+export function ReZeroHome({
+  preferences,
+  volumes,
+  loadedBook,
+  loadState,
+  progress,
+  onOpenVolume,
+  onOpenChapter,
+}: ReZeroHomeProps) {
   const sortedVolumes = [...volumes].sort((left, right) => left.order - right.order)
   const [selectedVolumeId, setSelectedVolumeId] = useState<string | null>(() => sortedVolumes[0]?.id ?? null)
   const selectedVolume = sortedVolumes.find((volume) => volume.id === selectedVolumeId)
     ?? sortedVolumes[0]
     ?? null
-  const canOpenVolume = selectedVolume?.status === 'available' && onOpenVolume !== undefined
+  const selectedLoadStatus = selectedVolume && loadState.volumeId === selectedVolume.id
+    ? loadState.status
+    : 'idle'
+  const selectedBook = selectedLoadStatus === 'ready' ? loadedBook : null
+  const chapters = selectedBook
+    ? [...selectedBook.chapters].sort((left, right) => left.order - right.order)
+    : []
+  const lastReadChapterId = progress !== null && selectedBook !== null &&
+    progress.bookId === selectedBook.id && chapters.some(
+    (chapter) => chapter.id === progress.chapterId,
+  )
+    ? progress.chapterId
+    : null
+
+  const statusLabel = selectedLoadStatus === 'loading'
+    ? 'Abriendo archivo'
+    : selectedLoadStatus === 'error'
+      ? 'No se pudo abrir'
+      : selectedLoadStatus === 'ready'
+        ? 'Disponible'
+        : selectedVolume
+          ? volumeStatus(selectedVolume)
+          : ''
+
+  const contentLabel = selectedLoadStatus === 'loading'
+    ? 'Cargando contenido'
+    : selectedLoadStatus === 'error'
+      ? 'No disponible'
+      : selectedLoadStatus === 'ready'
+        ? `${chapters.length} ${chapters.length === 1 ? 'capítulo' : 'capítulos'}`
+        : selectedVolume?.status === 'available'
+          ? 'Disponible'
+          : 'Próximamente'
+
+  const chapterMessage = selectedVolume?.status === 'preparing'
+    ? 'Contenido en preparación'
+    : selectedLoadStatus === 'loading'
+      ? 'Abriendo archivo…'
+      : selectedLoadStatus === 'error'
+        ? 'No se pudo abrir el archivo.'
+        : selectedLoadStatus === 'ready'
+          ? 'El archivo no contiene capítulos.'
+          : 'Abre el archivo para consultar sus capítulos.'
+
+  const actionLabel = selectedVolume?.status === 'preparing'
+    ? 'Próximamente'
+    : selectedLoadStatus === 'loading'
+      ? 'Abriendo archivo…'
+      : selectedLoadStatus === 'error'
+        ? 'Reintentar'
+        : selectedLoadStatus === 'ready'
+          ? lastReadChapterId === null ? 'Selecciona un capítulo' : 'Continuar'
+          : 'Abrir archivo'
+  const actionDisabled = selectedVolume === null || selectedVolume.status === 'preparing' ||
+    selectedLoadStatus === 'loading' || (selectedLoadStatus === 'ready' && lastReadChapterId === null)
 
   return (
     <main
@@ -39,7 +108,11 @@ export function ReZeroHome({ preferences, volumes, onOpenVolume }: ReZeroHomePro
         <ViewerSidebar
           volumes={sortedVolumes}
           selectedVolumeId={selectedVolume?.id ?? null}
+          chapters={chapters}
+          chapterMessage={chapterMessage}
+          lastReadChapterId={lastReadChapterId}
           onSelectVolume={setSelectedVolumeId}
+          onOpenChapter={onOpenChapter}
         />
 
         <div className="viewer-home__workspace">
@@ -69,7 +142,7 @@ export function ReZeroHome({ preferences, volumes, onOpenVolume }: ReZeroHomePro
               <div className="archive-volume__details">
                 <p className="archive-volume__status">
                   <span aria-hidden="true" />
-                  {volumeStatus(selectedVolume)}
+                  {statusLabel}
                 </p>
                 <h2>{selectedVolume.label}</h2>
                 <div className="archive-volume__divider" aria-hidden="true"><span /></div>
@@ -77,23 +150,34 @@ export function ReZeroHome({ preferences, volumes, onOpenVolume }: ReZeroHomePro
                 <dl className="archive-volume__facts">
                   <div>
                     <dt>Estado del archivo</dt>
-                    <dd>{volumeStatus(selectedVolume)}</dd>
+                    <dd>{statusLabel}</dd>
                   </div>
                   <div>
                     <dt>Contenido</dt>
-                    <dd>{selectedVolume.status === 'available' ? 'Disponible' : 'Próximamente'}</dd>
+                    <dd>{contentLabel}</dd>
                   </div>
                 </dl>
+
+                {(selectedLoadStatus === 'loading' || selectedLoadStatus === 'error') && (
+                  <p className="archive-volume__feedback" role="status" aria-live="polite">
+                    {selectedLoadStatus === 'loading' ? 'Abriendo archivo…' : 'No se pudo abrir el archivo.'}
+                  </p>
+                )}
 
                 <button
                   className="archive-volume__action"
                   type="button"
-                  disabled={!canOpenVolume}
+                  disabled={actionDisabled}
                   onClick={() => {
-                    if (canOpenVolume) onOpenVolume(selectedVolume)
+                    if (!selectedVolume || actionDisabled) return
+                    if (selectedLoadStatus === 'ready' && lastReadChapterId) {
+                      onOpenChapter(lastReadChapterId)
+                      return
+                    }
+                    onOpenVolume(selectedVolume)
                   }}
                 >
-                  {canOpenVolume ? 'Abrir volumen' : 'Próximamente'}
+                  {actionLabel}
                 </button>
               </div>
             </article>
@@ -105,7 +189,12 @@ export function ReZeroHome({ preferences, volumes, onOpenVolume }: ReZeroHomePro
 
           <section className="viewer-home__mobile-chapters" aria-labelledby="mobile-chapters-title">
             <h2 id="mobile-chapters-title">Capítulos</h2>
-            <p>Contenido en preparación</p>
+            <ViewerChapterList
+              chapters={chapters}
+              emptyMessage={chapterMessage}
+              lastReadChapterId={lastReadChapterId}
+              onOpenChapter={onOpenChapter}
+            />
           </section>
         </div>
       </div>

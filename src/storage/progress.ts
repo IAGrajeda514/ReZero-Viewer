@@ -1,8 +1,5 @@
 import { readStoredValue, removeStoredValue, STORAGE_KEYS } from './keys'
 
-const LEGACY_DEMO_BOOK_ID = 'novelview-demo'
-const SCRYVEIL_DEMO_BOOK_ID = 'scryveil-demo'
-
 export interface ReadingProgress {
   bookId: string
   chapterId: string
@@ -28,15 +25,9 @@ export function getReadingProgress(): ReadingProgress | null {
   try {
     const stored = readStoredValue('readingProgress')
     if (!stored) return null
-    const parsed: unknown = JSON.parse(stored.serialized)
+    const parsed: unknown = JSON.parse(stored)
     if (!isReadingProgress(parsed)) return null
-
-    const progress = parsed.bookId === LEGACY_DEMO_BOOK_ID
-      ? { ...parsed, bookId: SCRYVEIL_DEMO_BOOK_ID }
-      : parsed
-
-    if (stored.source === 'legacy' || progress !== parsed) saveReadingProgress(progress)
-    return progress
+    return parsed
   } catch {
     return null
   }

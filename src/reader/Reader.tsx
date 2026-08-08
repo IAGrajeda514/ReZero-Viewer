@@ -23,6 +23,7 @@ type NavigationDirection = 'next' | 'previous' | null
 type TransitionClass = '' | 'reader-page--exit-next' | 'reader-page--exit-previous' | 'reader-page--enter-next' | 'reader-page--enter-previous'
 
 interface ReaderProps {
+  appLabel: string
   book: Book
   chapter: Chapter
   speakerColors?: Readonly<Record<string, string>>
@@ -54,6 +55,7 @@ function resolvePage(model: ReaderPageModel, chapter: Chapter): ResolvedPage {
 }
 
 export function Reader({
+  appLabel,
   book,
   chapter,
   speakerColors,
@@ -284,7 +286,7 @@ export function Reader({
       <AmbientBackground preset={currentPreset} intensity={ambienceIntensity} reducedMotion={reducedMotion} />
 
       <header className={`reader-meta${areControlsVisible ? '' : ' reading-ui--quiet'}`}>
-        <strong>Scryveil</strong>
+        <strong>{appLabel}</strong>
         <span>{currentPage ? `Cap\u00edtulo ${String(currentPage.chapter.order).padStart(2, '0')} \u00b7 ${currentPage.scene.location.label}` : book.title}</span>
       </header>
 
@@ -364,6 +366,7 @@ export function Reader({
       />
 
       <ChapterDrawer
+        appLabel={appLabel}
         chapters={book.chapters}
         activeChapterId={chapter.id}
         isOpen={openDrawer === 'chapters'}

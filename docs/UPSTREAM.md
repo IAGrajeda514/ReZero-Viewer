@@ -34,4 +34,5 @@ Los cambios específicos —catálogo de volúmenes, branding, Content Packs y r
 
 ## Core candidates
 
-- **Configurable storage namespace.** Las claves heredadas usan el prefijo `scryveil.*`. Hoy los despliegues son independientes, pero un namespace configurable evitaría colisiones si varios viewers comparten un origen. RZ-001 no modifica esta infraestructura.
+- **Configurable Reader branding.** El Reader y el Chapter Drawer necesitan recibir una etiqueta pública desde la aplicación consumidora en vez de incluir una marca fija. ReZero Viewer aplica la parametrización mínima local; debe evaluarse como contrato genérico upstream.
+- **Configurable storage namespace.** ReZero Viewer usa el namespace `witch-archive.*` para evitar revelar o compartir claves con el motor heredado. El Core upstream debería permitir que cada consumidor configure su propio namespace.

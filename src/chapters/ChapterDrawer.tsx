@@ -1,6 +1,7 @@
 import type { ChapterSummary } from '../content/types'
 
 interface ChapterDrawerProps {
+  appLabel: string
   chapters: ChapterSummary[]
   activeChapterId: string
   isOpen: boolean
@@ -11,6 +12,7 @@ interface ChapterDrawerProps {
 }
 
 export function ChapterDrawer({
+  appLabel,
   chapters,
   activeChapterId,
   isOpen,
@@ -28,7 +30,7 @@ export function ChapterDrawer({
         </header>
         <button className="drawer-home-action" type="button" onClick={onHome}>
           <span aria-hidden="true">←</span>
-          <span><small>Scryveil</small>Biblioteca</span>
+          <span><small>{appLabel}</small>Biblioteca</span>
         </button>
         <div className="chapter-list">
           {chapters.map((chapter) => {

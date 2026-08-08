@@ -8,3 +8,7 @@ export interface ViewerVolume {
   contentPackBaseUrl?: string
   status: ViewerVolumeStatus
 }
+
+export type ViewerVolumeLoadState =
+  | { status: 'idle'; volumeId: null }
+  | { status: 'loading' | 'ready' | 'error'; volumeId: string }
