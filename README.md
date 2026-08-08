@@ -1,10 +1,8 @@
-# Scryveil
+# Re:Zero Viewer
 
-_See beyond the veil._
+Re:Zero Viewer es un lector web inmersivo, experimental y fan-made.
 
-Scryveil is a private, immersive narrative reader. Its reader engine remains independent from book content so private content packs do not need to be versioned with the application.
-
-The project currently includes a Home/Library entry screen, the approved Reader V2 experience, semantic narrative blocks, dynamic ambience, automatic DOM-measured pagination, persistent reader preferences and content-anchored progress, responsive navigation, and runtime JSON Content Packs loaded one chapter at a time.
+El shell actual presenta un catálogo de volúmenes preparado para conectar Content Packs. Todavía no incluye texto narrativo ni contenido real de Re:Zero: `Volumen 01` aparece únicamente como en preparación.
 
 ## Stack
 
@@ -14,7 +12,7 @@ The project currently includes a Home/Library entry screen, the approved Reader 
 - React hooks
 - ES Modules
 - npm
-- localStorage for reader preferences and progress
+- localStorage para preferencias y progreso del Reader
 
 ## Commands
 
@@ -29,21 +27,18 @@ npm run preview
 ## Structure
 
 ```text
-public/content-packs/  # Versionable fictional/demo Content Packs
 src/
-├── app/              # Application composition and content selection
-├── ambience/         # Ambient presets and crossfade background
-├── chapters/         # Chapter navigation drawer
-├── content/          # Domain contracts and runtime Content Pack loader
-├── home/             # Home/Library presentation and reading entry points
-├── reader/           # Reader, automatic pagination, rendering, and navigation
-├── settings/         # Persistent reader settings
-├── storage/          # Safe localStorage helpers
-└── styles/           # Base, reader, ambience, themes, and controls
+├── app/       # Application composition
+├── ambience/  # Ambient presets and crossfade background
+├── chapters/  # Chapter navigation drawer
+├── content/   # Domain contracts and runtime Content Pack loader
+├── reader/    # Reader, automatic pagination, rendering, and navigation
+├── settings/  # Persistent reader settings
+├── storage/   # Safe localStorage helpers
+├── styles/    # Base, reader, ambience, themes, and controls
+└── viewer/    # Re:Zero Viewer catalog and Home shell
 ```
 
 ## Content separation
 
-The application opens on Home after loading only the lightweight Content Pack manifest. A chapter is fetched and passed to the Reader only when the reader starts, continues, or selects it. The included `public/content-packs/scryveil-demo/` pack contains original fictional material solely for exercising the engine.
-
-Private content belongs in ignored locations such as `content-local/` or `private-books/`; PDFs and EPUBs are also excluded from version control. Scryveil does not currently import or parse those formats.
+Los Content Packs se mantienen separados de la aplicación. Cuando un volumen esté disponible, su selección conectará deliberadamente el `contentPackBaseUrl` con el cargador de contenido; el lector y sus contratos permanecen desacoplados del contenido narrativo.
