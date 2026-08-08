@@ -1,6 +1,6 @@
-import { AmbientBackground } from '../ambience/AmbientBackground'
-import { getAmbiencePreset } from '../ambience/presets'
+import { useState } from 'react'
 import type { ReaderPreferences } from '../storage/preferences'
+import { ViewerSidebar } from './ViewerSidebar'
 import type { ViewerVolume } from './types'
 import './ReZeroHome.css'
 
@@ -10,80 +10,104 @@ interface ReZeroHomeProps {
   onOpenVolume?: (volume: ViewerVolume) => void
 }
 
-const homeAmbience = getAmbiencePreset('home')
-
 function volumeMark(order: number): string {
   return `VOL. ${String(order).padStart(2, '0')}`
 }
 
+function volumeStatus(volume: ViewerVolume): string {
+  return volume.status === 'available' ? 'Disponible' : 'En preparación'
+}
+
 export function ReZeroHome({ preferences, volumes, onOpenVolume }: ReZeroHomeProps) {
   const sortedVolumes = [...volumes].sort((left, right) => left.order - right.order)
-  const ambienceIntensity = Math.min(
-    1.1,
-    Math.max(0, preferences.ambienceIntensity * homeAmbience.visuals.intensity),
-  )
+  const [selectedVolumeId, setSelectedVolumeId] = useState<string | null>(() => sortedVolumes[0]?.id ?? null)
+  const selectedVolume = sortedVolumes.find((volume) => volume.id === selectedVolumeId)
+    ?? sortedVolumes[0]
+    ?? null
+  const canOpenVolume = selectedVolume?.status === 'available' && onOpenVolume !== undefined
 
   return (
     <main
       className="reader-app viewer-home"
       data-theme={preferences.theme}
       data-reduced-motion={preferences.reducedMotion}
-      data-view="rezero-viewer-home"
+      data-view="witch-archive-home"
     >
-      <AmbientBackground
-        preset={homeAmbience}
-        intensity={ambienceIntensity}
-        reducedMotion={preferences.reducedMotion}
-      />
+      <div className="viewer-home__backdrop" aria-hidden="true" />
 
       <div className="viewer-home__shell">
-        <header className="viewer-home__brand">
-          <div>
-            <p className="viewer-home__eyebrow">Viewer de lectura</p>
-            <h1>Re:Zero Viewer</h1>
-          </div>
-        </header>
+        <ViewerSidebar
+          volumes={sortedVolumes}
+          selectedVolumeId={selectedVolume?.id ?? null}
+          onSelectVolume={setSelectedVolumeId}
+        />
 
-        <section className="viewer-home__catalog" aria-labelledby="volumes-title">
-          <header className="viewer-home__catalog-header">
-            <div>
-              <p className="viewer-home__eyebrow">Catálogo</p>
-              <h2 id="volumes-title">Volúmenes</h2>
+        <div className="viewer-home__workspace">
+          <header className="archive-header">
+            <div className="archive-header__seal" aria-hidden="true"><span /></div>
+            <h1>Witch's Archive</h1>
+            <div className="archive-header__tagline" aria-label="Crónicas de lo prohibido">
+              <span aria-hidden="true" />
+              <p>Crónicas de lo prohibido</p>
+              <span aria-hidden="true" />
             </div>
-            <span>{sortedVolumes.length} {sortedVolumes.length === 1 ? 'volumen' : 'volúmenes'}</span>
           </header>
 
-          <div className="viewer-home__volumes">
-            {sortedVolumes.map((volume) => {
-              const isAvailable = volume.status === 'available' && onOpenVolume !== undefined
-              const content = (
-                <>
-                  <span className="viewer-volume__mark" aria-hidden="true">{volumeMark(volume.order)}</span>
-                  <span className="viewer-volume__copy">
-                    <strong>{volume.label}</strong>
-                    <small>{volume.status === 'preparing' ? 'En preparación' : 'Disponible'}</small>
-                  </span>
-                  {isAvailable && <span className="viewer-volume__arrow" aria-hidden="true">→</span>}
-                </>
-              )
+          {selectedVolume ? (
+            <article className="archive-volume" data-status={selectedVolume.status}>
+              <div className="archive-volume__art" aria-hidden="true">
+                <div className="archive-volume__art-frame">
+                  <span className="archive-volume__corner archive-volume__corner--top-left" />
+                  <span className="archive-volume__corner archive-volume__corner--top-right" />
+                  <span className="archive-volume__corner archive-volume__corner--bottom-left" />
+                  <span className="archive-volume__corner archive-volume__corner--bottom-right" />
+                  <p>{volumeMark(selectedVolume.order)}</p>
+                  <div className="archive-volume__art-sigil"><span /></div>
+                </div>
+              </div>
 
-              return isAvailable ? (
+              <div className="archive-volume__details">
+                <p className="archive-volume__status">
+                  <span aria-hidden="true" />
+                  {volumeStatus(selectedVolume)}
+                </p>
+                <h2>{selectedVolume.label}</h2>
+                <div className="archive-volume__divider" aria-hidden="true"><span /></div>
+
+                <dl className="archive-volume__facts">
+                  <div>
+                    <dt>Estado del archivo</dt>
+                    <dd>{volumeStatus(selectedVolume)}</dd>
+                  </div>
+                  <div>
+                    <dt>Contenido</dt>
+                    <dd>{selectedVolume.status === 'available' ? 'Disponible' : 'Próximamente'}</dd>
+                  </div>
+                </dl>
+
                 <button
-                  key={volume.id}
-                  className="viewer-volume viewer-volume--available"
+                  className="archive-volume__action"
                   type="button"
-                  onClick={() => onOpenVolume(volume)}
+                  disabled={!canOpenVolume}
+                  onClick={() => {
+                    if (canOpenVolume) onOpenVolume(selectedVolume)
+                  }}
                 >
-                  {content}
+                  {canOpenVolume ? 'Abrir volumen' : 'Próximamente'}
                 </button>
-              ) : (
-                <article key={volume.id} className="viewer-volume" aria-label={`${volume.label}: En preparación`}>
-                  {content}
-                </article>
-              )
-            })}
-          </div>
-        </section>
+              </div>
+            </article>
+          ) : (
+            <section className="archive-volume archive-volume--empty">
+              <p>El archivo todavía no contiene volúmenes.</p>
+            </section>
+          )}
+
+          <section className="viewer-home__mobile-chapters" aria-labelledby="mobile-chapters-title">
+            <h2 id="mobile-chapters-title">Capítulos</h2>
+            <p>Contenido en preparación</p>
+          </section>
+        </div>
       </div>
     </main>
   )
