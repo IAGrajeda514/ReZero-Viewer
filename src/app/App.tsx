@@ -10,7 +10,7 @@ import {
   type ReaderPreferences,
 } from '../storage/preferences'
 
-const demoContentLoader = createHttpContentLoader('/content-packs/novelview-demo')
+const demoContentLoader = createHttpContentLoader('/content-packs/scryveil-demo')
 
 type ContentStatus = 'loading-content' | 'loading-chapter' | 'ready' | 'error'
 
@@ -39,7 +39,7 @@ function AppStatus({ message, preferences, onRetry }: AppStatusProps) {
   return (
     <main className="reader-app app-status" data-theme={preferences.theme}>
       <div className="app-status__content">
-        <h1>NovelView</h1>
+        <h1>Scryveil</h1>
         <p>{message}</p>
         {onRetry && <button type="button" onClick={onRetry}>Reintentar</button>}
       </div>
@@ -93,7 +93,7 @@ function App() {
       setContentStatus('ready')
     } catch (error) {
       if (requestId !== requestIdRef.current) return
-      console.error('NovelView failed to load its content pack.', error)
+      console.error('Scryveil failed to load its content pack.', error)
       setContentStatus('error')
     }
   }, [])
@@ -119,7 +119,7 @@ function App() {
       setContentStatus('ready')
     } catch (error) {
       if (requestId !== requestIdRef.current) return
-      console.error(`NovelView failed to load chapter ${chapterId}.`, error)
+      console.error(`Scryveil failed to load chapter ${chapterId}.`, error)
       setContentStatus('error')
     }
   }, [content])

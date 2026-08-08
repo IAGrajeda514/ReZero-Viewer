@@ -1,4 +1,7 @@
-import { STORAGE_KEYS } from './keys'
+import { readStoredValue, removeStoredValue, STORAGE_KEYS } from './keys'
+
+const LEGACY_DEMO_BOOK_ID = 'novelview-demo'
+const SCRYVEIL_DEMO_BOOK_ID = 'scryveil-demo'
 
 export interface ReadingProgress {
   bookId: string
@@ -23,10 +26,17 @@ function isReadingProgress(value: unknown): value is ReadingProgress {
 
 export function getReadingProgress(): ReadingProgress | null {
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEYS.readingProgress)
+    const stored = readStoredValue('readingProgress')
     if (!stored) return null
-    const parsed: unknown = JSON.parse(stored)
-    return isReadingProgress(parsed) ? parsed : null
+    const parsed: unknown = JSON.parse(stored.serialized)
+    if (!isReadingProgress(parsed)) return null
+
+    const progress = parsed.bookId === LEGACY_DEMO_BOOK_ID
+      ? { ...parsed, bookId: SCRYVEIL_DEMO_BOOK_ID }
+      : parsed
+
+    if (stored.source === 'legacy' || progress !== parsed) saveReadingProgress(progress)
+    return progress
   } catch {
     return null
   }
@@ -42,10 +52,5 @@ export function saveReadingProgress(progress: ReadingProgress): boolean {
 }
 
 export function clearReadingProgress(): boolean {
-  try {
-    window.localStorage.removeItem(STORAGE_KEYS.readingProgress)
-    return true
-  } catch {
-    return false
-  }
+  return removeStoredValue('readingProgress')
 }

@@ -1,55 +1,48 @@
-# NovelView
+# Scryveil
 
-NovelView is a private, immersive web reader for novels. The reader engine is deliberately independent from private book content.
+_See beyond the veil._
 
-The project currently includes the first React integration of the approved Reader V2 experience over the established foundation.
+Scryveil is a private, immersive narrative reader. Its reader engine remains independent from book content so private content packs do not need to be versioned with the application.
+
+The project currently includes the approved Reader V2 experience, semantic narrative blocks, dynamic ambience, automatic DOM-measured pagination, persistent reader preferences and content-anchored progress, responsive navigation, and runtime JSON Content Packs loaded one chapter at a time.
 
 ## Stack
 
 - Vite
-- React + TypeScript
-- CSS puro
+- React + TypeScript (strict)
+- Pure CSS
 - React hooks
 - ES Modules
 - npm
-- localStorage (initial reader preferences and progress)
+- localStorage for reader preferences and progress
 
 ## Commands
 
 ```bash
 npm install
 npm run dev
+npm run lint
 npm run build
 npm run preview
 ```
 
-`npm run lint` runs the TypeScript static check used in this foundation.
-
 ## Structure
 
 ```text
+public/content-packs/  # Versionable fictional/demo Content Packs
 src/
-├── app/          # Application composition
-├── ambience/     # Ambient presets and crossfade background
-├── chapters/     # Chapter navigation drawer
-├── content/      # Generic book, chapter, scene, and block models
-├── reader/       # Reader experience, page rendering, and navigation hooks
-├── settings/     # Persistent reader settings drawer
-├── storage/      # localStorage helpers
-└── styles/       # Base, reader, ambience, theme, and control CSS
+├── app/              # Application composition and content selection
+├── ambience/         # Ambient presets and crossfade background
+├── chapters/         # Chapter navigation drawer
+├── content/          # Domain contracts and runtime Content Pack loader
+├── reader/           # Reader, automatic pagination, rendering, and navigation
+├── settings/         # Persistent reader settings
+├── storage/          # Safe localStorage helpers
+└── styles/           # Base, reader, ambience, themes, and controls
 ```
 
-## Private content convention
+## Content separation
 
-Private content is never versioned with the reader engine. Local packs will live in the ignored `content-local/` directory:
+The runtime loader reads a lightweight manifest and fetches only the selected chapter. The included `public/content-packs/scryveil-demo/` pack contains original fictional material solely for exercising the engine.
 
-```text
-content-local/
-└── book-id/
-    ├── metadata.json
-    ├── prologue.json
-    ├── chapter-01.json
-    └── chapter-02.json
-```
-
-The loading strategy for these packs is intentionally deferred until a later iteration.
+Private content belongs in ignored locations such as `content-local/` or `private-books/`; PDFs and EPUBs are also excluded from version control. Scryveil does not currently import or parse those formats.

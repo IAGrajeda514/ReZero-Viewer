@@ -1,4 +1,4 @@
-import { STORAGE_KEYS } from './keys'
+import { readStoredValue, removeStoredValue, STORAGE_KEYS } from './keys'
 
 export type ReaderTheme = 'dark-immersive' | 'night-sepia' | 'light-atmospheric'
 
@@ -43,10 +43,13 @@ function isReaderPreferences(value: unknown): value is ReaderPreferences {
 
 export function getReaderPreferences(): ReaderPreferences {
   try {
-    const stored = window.localStorage.getItem(STORAGE_KEYS.readerPreferences)
+    const stored = readStoredValue('readerPreferences')
     if (!stored) return createDefaultPreferences()
-    const parsed: unknown = JSON.parse(stored)
-    return isReaderPreferences(parsed) ? parsed : createDefaultPreferences()
+    const parsed: unknown = JSON.parse(stored.serialized)
+    if (!isReaderPreferences(parsed)) return createDefaultPreferences()
+
+    if (stored.source === 'legacy') saveReaderPreferences(parsed)
+    return parsed
   } catch {
     return createDefaultPreferences()
   }
@@ -62,11 +65,7 @@ export function saveReaderPreferences(preferences: ReaderPreferences): boolean {
 }
 
 export function resetReaderPreferences(): ReaderPreferences {
-  try {
-    window.localStorage.removeItem(STORAGE_KEYS.readerPreferences)
-  } catch {
-    // Returning defaults keeps the reader usable when storage is unavailable.
-  }
+  removeStoredValue('readerPreferences')
 
   return createDefaultPreferences()
 }
