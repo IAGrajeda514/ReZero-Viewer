@@ -29,6 +29,7 @@ interface ReaderProps {
   preferences: ReaderPreferences
   onPreferencesChange: (changes: Partial<ReaderPreferences>) => void
   onChapterSelect: (chapterId: string) => void
+  onHome: () => void
 }
 
 interface ResolvedPage {
@@ -59,6 +60,7 @@ export function Reader({
   preferences,
   onPreferencesChange,
   onChapterSelect,
+  onHome,
 }: ReaderProps) {
   const colorMap = speakerColors ?? EMPTY_SPEAKER_COLORS
   const resolveSpeakerColor = useCallback((characterId: string) => colorMap[characterId], [colorMap])
@@ -265,6 +267,10 @@ export function Reader({
     closeDrawers()
     if (chapterId !== chapter.id) onChapterSelect(chapterId)
   }, [chapter.id, closeDrawers, onChapterSelect])
+  const returnHome = useCallback(() => {
+    closeDrawers()
+    onHome()
+  }, [closeDrawers, onHome])
 
   return (
     <main
@@ -363,6 +369,7 @@ export function Reader({
         isOpen={openDrawer === 'chapters'}
         progressForChapter={progressForChapter}
         onSelect={selectChapter}
+        onHome={returnHome}
         onClose={closeDrawers}
       />
       <ReaderSettings

@@ -46,6 +46,15 @@ export const ambiencePresets: AmbiencePreset[] = [
       accent: '#778db9', lighting: '#4a5878', vignette: 0.55, blur: 2, intensity: 0.98,
     },
   },
+  {
+    id: 'home', location: 'generic', time: 'unknown', mood: 'neutral',
+    visuals: {
+      background: 'radial-gradient(circle at 18% 18%, rgb(107 90 159 / 24%), transparent 31%), radial-gradient(circle at 82% 68%, rgb(76 125 151 / 18%), transparent 30%), radial-gradient(circle at 62% 4%, rgb(210 169 112 / 12%), transparent 23%), linear-gradient(145deg, #151827 0%, #0b111b 48%, #05070c 100%)',
+      texture: 'linear-gradient(115deg, transparent 15%, rgb(203 184 151 / 4%) 36%, transparent 58%), radial-gradient(circle at 28% 74%, rgb(220 202 168 / 10%) 0 1px, transparent 3px), radial-gradient(circle at 74% 28%, rgb(175 198 226 / 9%) 0 2px, transparent 5px)',
+      shade: 'radial-gradient(ellipse at center, transparent 28%, rgb(1 3 7 / 63%) 92%)',
+      accent: '#9c91c7', lighting: '#b9a783', vignette: 0.52, blur: 12, intensity: 0.9,
+    },
+  },
 ]
 
 export function getAmbiencePreset(presetId?: string): AmbiencePreset {

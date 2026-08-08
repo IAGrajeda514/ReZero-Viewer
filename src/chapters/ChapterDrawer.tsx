@@ -6,6 +6,7 @@ interface ChapterDrawerProps {
   isOpen: boolean
   progressForChapter: (chapterId: string) => number | null
   onSelect: (chapterId: string) => void
+  onHome: () => void
   onClose: () => void
 }
 
@@ -15,6 +16,7 @@ export function ChapterDrawer({
   isOpen,
   progressForChapter,
   onSelect,
+  onHome,
   onClose,
 }: ChapterDrawerProps) {
   return (
@@ -24,6 +26,10 @@ export function ChapterDrawer({
           <div><p>Navegación</p><h2>Índice</h2></div>
           <button className="drawer__close" type="button" onClick={onClose} aria-label="Cerrar índice">×</button>
         </header>
+        <button className="drawer-home-action" type="button" onClick={onHome}>
+          <span aria-hidden="true">←</span>
+          <span><small>Scryveil</small>Biblioteca</span>
+        </button>
         <div className="chapter-list">
           {chapters.map((chapter) => {
             const progress = progressForChapter(chapter.id)

@@ -2,8 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { createHttpContentLoader } from '../content/loader'
 import type { ContentPackManifest } from '../content/schema'
 import type { Book, Chapter } from '../content/types'
+import { HomeScreen } from '../home/HomeScreen'
 import { Reader } from '../reader/Reader'
-import { getReadingProgress } from '../storage/progress'
+import { getReadingProgress, type ReadingProgress } from '../storage/progress'
 import {
   getReaderPreferences,
   saveReaderPreferences,
@@ -12,12 +13,16 @@ import {
 
 const demoContentLoader = createHttpContentLoader('/content-packs/scryveil-demo')
 
-type ContentStatus = 'loading-content' | 'loading-chapter' | 'ready' | 'error'
+type AppView =
+  | { type: 'loading-library' }
+  | { type: 'home' }
+  | { type: 'loading-chapter'; chapterId: string }
+  | { type: 'reader'; chapter: Chapter }
+  | { type: 'library-error' }
+  | { type: 'chapter-error'; chapterId: string }
 
-interface LoadedContent {
-  manifest: ContentPackManifest
+interface LoadedLibrary {
   book: Book
-  chapter: Chapter
   speakerColors: Readonly<Record<string, string>>
 }
 
@@ -25,6 +30,7 @@ interface AppStatusProps {
   message: string
   preferences: ReaderPreferences
   onRetry?: () => void
+  onHome?: () => void
 }
 
 function createSpeakerColors(manifest: ContentPackManifest): Readonly<Record<string, string>> {
@@ -35,13 +41,22 @@ function sortBookChapters(book: Book): Book {
   return { ...book, chapters: [...book.chapters].sort((left, right) => left.order - right.order) }
 }
 
-function AppStatus({ message, preferences, onRetry }: AppStatusProps) {
+function AppStatus({ message, preferences, onRetry, onHome }: AppStatusProps) {
   return (
-    <main className="reader-app app-status" data-theme={preferences.theme}>
+    <main
+      className="reader-app app-status"
+      data-theme={preferences.theme}
+      data-reduced-motion={preferences.reducedMotion}
+    >
       <div className="app-status__content">
         <h1>Scryveil</h1>
         <p>{message}</p>
-        {onRetry && <button type="button" onClick={onRetry}>Reintentar</button>}
+        {(onRetry || onHome) && (
+          <div className="app-status__actions">
+            {onRetry && <button type="button" onClick={onRetry}>Reintentar</button>}
+            {onHome && <button type="button" onClick={onHome}>Volver a inicio</button>}
+          </div>
+        )}
       </div>
     </main>
   )
@@ -49,10 +64,10 @@ function AppStatus({ message, preferences, onRetry }: AppStatusProps) {
 
 function App() {
   const [preferences, setPreferences] = useState(getReaderPreferences)
-  const [content, setContent] = useState<LoadedContent | null>(null)
-  const [contentStatus, setContentStatus] = useState<ContentStatus>('loading-content')
+  const [progress, setProgress] = useState<ReadingProgress | null>(getReadingProgress)
+  const [library, setLibrary] = useState<LoadedLibrary | null>(null)
+  const [view, setView] = useState<AppView>({ type: 'loading-library' })
   const requestIdRef = useRef(0)
-  const failedChapterIdRef = useRef<string | null>(null)
 
   useEffect(() => {
     saveReaderPreferences(preferences)
@@ -62,96 +77,97 @@ function App() {
     setPreferences((current) => ({ ...current, ...changes }))
   }, [])
 
-  const loadInitialContent = useCallback(async () => {
+  const loadLibrary = useCallback(async () => {
     const requestId = ++requestIdRef.current
-    failedChapterIdRef.current = null
-    setContent(null)
-    setContentStatus('loading-content')
+    setLibrary(null)
+    setView({ type: 'loading-library' })
 
     try {
       const manifest = await demoContentLoader.loadManifest()
-      const book = sortBookChapters(await demoContentLoader.loadBook())
-      const firstChapter = book.chapters[0]
-      if (!firstChapter) throw new Error('The content pack does not declare any chapters.')
-
-      const progress = getReadingProgress()
-      const progressChapterExists = progress?.bookId === book.id && book.chapters.some(
-        (chapter) => chapter.id === progress.chapterId,
-      )
-      const chapterId = progressChapterExists && progress ? progress.chapterId : firstChapter.id
-      failedChapterIdRef.current = chapterId
-      const chapter = await demoContentLoader.loadChapter(chapterId)
+      const book = sortBookChapters(manifest.book)
+      if (book.chapters.length === 0) throw new Error('The content pack does not declare any chapters.')
       if (requestId !== requestIdRef.current) return
 
-      setContent({
-        manifest,
-        book,
-        chapter,
-        speakerColors: createSpeakerColors(manifest),
-      })
-      failedChapterIdRef.current = null
-      setContentStatus('ready')
+      setLibrary({ book, speakerColors: createSpeakerColors(manifest) })
+      setProgress(getReadingProgress())
+      setView({ type: 'home' })
     } catch (error) {
       if (requestId !== requestIdRef.current) return
       console.error('Scryveil failed to load its content pack.', error)
-      setContentStatus('error')
+      setView({ type: 'library-error' })
     }
   }, [])
 
   useEffect(() => {
-    void loadInitialContent()
+    void loadLibrary()
     return () => {
       requestIdRef.current += 1
     }
-  }, [loadInitialContent])
+  }, [loadLibrary])
 
-  const loadSelectedChapter = useCallback(async (chapterId: string) => {
-    if (!content || chapterId === content.chapter.id) return
+  const openChapter = useCallback(async (chapterId: string) => {
+    if (!library?.book.chapters.some((chapter) => chapter.id === chapterId)) return
+
     const requestId = ++requestIdRef.current
-    failedChapterIdRef.current = chapterId
-    setContentStatus('loading-chapter')
+    setView({ type: 'loading-chapter', chapterId })
 
     try {
       const chapter = await demoContentLoader.loadChapter(chapterId)
       if (requestId !== requestIdRef.current) return
-      setContent((current) => current ? { ...current, chapter } : current)
-      failedChapterIdRef.current = null
-      setContentStatus('ready')
+      setView({ type: 'reader', chapter })
     } catch (error) {
       if (requestId !== requestIdRef.current) return
       console.error(`Scryveil failed to load chapter ${chapterId}.`, error)
-      setContentStatus('error')
+      setView({ type: 'chapter-error', chapterId })
     }
-  }, [content])
+  }, [library])
 
-  const retry = useCallback(() => {
-    const failedChapterId = failedChapterIdRef.current
-    if (content && failedChapterId) {
-      void loadSelectedChapter(failedChapterId)
-      return
-    }
-    void loadInitialContent()
-  }, [content, loadInitialContent, loadSelectedChapter])
+  const returnHome = useCallback(() => {
+    requestIdRef.current += 1
+    setProgress(getReadingProgress())
+    setView({ type: 'home' })
+  }, [])
 
-  if (contentStatus === 'error') {
-    return <AppStatus message="No se pudo cargar el contenido." preferences={preferences} onRetry={retry} />
+  if (view.type === 'library-error') {
+    return <AppStatus message="No se pudo cargar la biblioteca." preferences={preferences} onRetry={loadLibrary} />
   }
-  if (contentStatus === 'loading-chapter') {
-    return <AppStatus message="Preparando capítulo…" preferences={preferences} />
+  if (view.type === 'loading-library' || !library) {
+    return <AppStatus message="Preparando biblioteca…" preferences={preferences} />
   }
-  if (contentStatus !== 'ready' || !content) {
-    return <AppStatus message="Preparando lectura…" preferences={preferences} />
+  if (view.type === 'chapter-error') {
+    return (
+      <AppStatus
+        message="No se pudo cargar el capítulo."
+        preferences={preferences}
+        onRetry={() => { void openChapter(view.chapterId) }}
+        onHome={returnHome}
+      />
+    )
+  }
+  if (view.type === 'loading-chapter') {
+    return <AppStatus message="Preparando capítulo…" preferences={preferences} onHome={returnHome} />
+  }
+  if (view.type === 'home') {
+    return (
+      <HomeScreen
+        book={library.book}
+        progress={progress}
+        preferences={preferences}
+        onOpenChapter={(chapterId) => { void openChapter(chapterId) }}
+      />
+    )
   }
 
   return (
     <Reader
-      key={content.chapter.id}
-      book={content.book}
-      chapter={content.chapter}
-      speakerColors={content.speakerColors}
+      key={view.chapter.id}
+      book={library.book}
+      chapter={view.chapter}
+      speakerColors={library.speakerColors}
       preferences={preferences}
       onPreferencesChange={updatePreferences}
-      onChapterSelect={(chapterId) => { void loadSelectedChapter(chapterId) }}
+      onChapterSelect={(chapterId) => { void openChapter(chapterId) }}
+      onHome={returnHome}
     />
   )
 }

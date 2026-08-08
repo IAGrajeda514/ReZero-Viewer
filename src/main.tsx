@@ -6,6 +6,7 @@ import './styles/reader.css'
 import './styles/ambience.css'
 import './styles/themes.css'
 import './styles/controls.css'
+import './styles/home.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
