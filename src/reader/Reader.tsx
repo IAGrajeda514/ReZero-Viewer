@@ -23,6 +23,7 @@ type NavigationDirection = 'next' | 'previous' | null
 type TransitionClass = '' | 'reader-page--exit-next' | 'reader-page--exit-previous' | 'reader-page--enter-next' | 'reader-page--enter-previous'
 
 interface ReaderProps {
+  className?: string
   appLabel: string
   book: Book
   chapter: Chapter
@@ -55,6 +56,7 @@ function resolvePage(model: ReaderPageModel, chapter: Chapter): ResolvedPage {
 }
 
 export function Reader({
+  className,
   appLabel,
   book,
   chapter,
@@ -276,7 +278,7 @@ export function Reader({
 
   return (
     <main
-      className="reader-app"
+      className={`reader-app${className ? ` ${className}` : ''}`}
       data-theme={preferences.theme}
       data-reduced-motion={reducedMotion}
       style={readerStyle}

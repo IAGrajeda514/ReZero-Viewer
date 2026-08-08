@@ -10,6 +10,7 @@ import {
   type ReaderPreferences,
 } from '../storage/preferences'
 import { ReZeroHome } from '../viewer/ReZeroHome'
+import '../viewer/WitchArchiveReader.css'
 import { VIEWER_VOLUMES } from '../viewer/catalog'
 import type { ViewerVolume, ViewerVolumeLoadState } from '../viewer/types'
 
@@ -198,6 +199,7 @@ function App() {
     return (
       <Reader
         key={`${readerSession.volumeId}:${readerSession.chapter.id}`}
+        className="witch-archive-reader"
         appLabel={VIEWER_LABEL}
         book={loadedVolume.book}
         chapter={readerSession.chapter}
