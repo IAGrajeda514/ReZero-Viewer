@@ -142,11 +142,41 @@
   color: color-mix(in srgb, var(--archive-reader-muted) 88%, var(--archive-reader-gold) 12%);
 }
 
-.witch-archive-reader .reader-page__footer span:nth-child(2) {
+.witch-archive-reader .reader-page__footer > :nth-child(2) {
   position: relative;
 }
 
-.witch-archive-reader .reader-page__footer span:nth-child(2)::before {
+.witch-archive-reader .reader-page--exit-next {
+  opacity: .18;
+  filter: blur(1px);
+  transform: translateX(-18px) scale(.994);
+}
+
+.witch-archive-reader .reader-page--exit-previous {
+  opacity: .18;
+  filter: blur(1px);
+  transform: translateX(18px) scale(.994);
+}
+
+.witch-archive-reader .reader-page--enter-next {
+  animation-name: witch-archive-reader-enter-next;
+}
+
+.witch-archive-reader .reader-page--enter-previous {
+  animation-name: witch-archive-reader-enter-previous;
+}
+
+@keyframes witch-archive-reader-enter-next {
+  from { opacity: .18; filter: blur(1px); transform: translateX(18px) scale(.994); }
+  to { opacity: 1; filter: none; transform: none; }
+}
+
+@keyframes witch-archive-reader-enter-previous {
+  from { opacity: .18; filter: blur(1px); transform: translateX(-18px) scale(.994); }
+  to { opacity: 1; filter: none; transform: none; }
+}
+
+.witch-archive-reader .reader-page__footer > :nth-child(2)::before {
   position: absolute;
   top: 50%;
   left: -12px;
@@ -155,6 +185,18 @@
   border: 1px solid rgb(var(--archive-reader-gold-rgb) / 46%);
   content: '';
   transform: translateY(-50%) rotate(45deg);
+}
+
+.witch-archive-reader .reader-page__end-action {
+  border-color: rgb(var(--archive-reader-gold-rgb) / 34%);
+  color: var(--archive-reader-gold);
+  background: linear-gradient(90deg, rgb(var(--archive-reader-purple-rgb) / 14%), rgb(var(--archive-reader-gold-rgb) / 4%));
+  box-shadow: 0 0 18px rgb(var(--archive-reader-purple-rgb) / 13%), inset 0 1px rgb(255 255 255 / 4%);
+}
+
+.witch-archive-reader .reader-page__end-action:hover {
+  border-color: rgb(var(--archive-reader-gold-rgb) / 58%);
+  color: var(--archive-reader-ivory);
 }
 
 .witch-archive-reader .reader-side-button,
@@ -194,6 +236,25 @@
 .witch-archive-reader .progress-mini i {
   background: linear-gradient(90deg, var(--archive-reader-purple), var(--archive-reader-gold));
   box-shadow: 0 0 9px rgb(var(--archive-reader-purple-rgb) / 38%);
+}
+
+.witch-archive-reader .page-picker__popover {
+  border-color: rgb(var(--archive-reader-gold-rgb) / 28%);
+  background:
+    linear-gradient(145deg, rgb(var(--archive-reader-purple-rgb) / 9%), transparent 55%),
+    rgb(var(--paper-rgb) / 95%);
+  box-shadow: 0 22px 60px rgb(0 0 0 / 58%), 0 0 24px rgb(var(--archive-reader-purple-rgb) / 9%);
+}
+
+.witch-archive-reader .page-picker__popover > p {
+  color: var(--archive-reader-gold);
+}
+
+.witch-archive-reader .page-picker__list button:hover,
+.witch-archive-reader .page-picker__list button[aria-current='page'] {
+  border-color: rgb(var(--archive-reader-gold-rgb) / 42%);
+  color: var(--archive-reader-ivory);
+  background: rgb(var(--archive-reader-purple-rgb) / 12%);
 }
 
 .witch-archive-reader .edge-guard {

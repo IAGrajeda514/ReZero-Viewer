@@ -10,6 +10,7 @@ import {
   type ReaderPreferences,
 } from '../storage/preferences'
 import { ReZeroHome } from '../viewer/ReZeroHome'
+import { WITCH_ARCHIVE_AMBIENCE_PRESETS } from '../viewer/ambiencePresets'
 import '../viewer/WitchArchiveReader.css'
 import { VIEWER_VOLUMES } from '../viewer/catalog'
 import type { ViewerVolume, ViewerVolumeLoadState } from '../viewer/types'
@@ -204,6 +205,7 @@ function App() {
         book={loadedVolume.book}
         chapter={readerSession.chapter}
         speakerColors={loadedVolume.speakerColors}
+        ambiencePresets={WITCH_ARCHIVE_AMBIENCE_PRESETS}
         preferences={preferences}
         onPreferencesChange={updatePreferences}
         onChapterSelect={(chapterId) => { void openChapter(chapterId) }}

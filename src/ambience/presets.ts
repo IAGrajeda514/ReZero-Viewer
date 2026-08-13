@@ -57,6 +57,11 @@ export const ambiencePresets: AmbiencePreset[] = [
   },
 ]
 
-export function getAmbiencePreset(presetId?: string): AmbiencePreset {
-  return ambiencePresets.find((preset) => preset.id === presetId) ?? ambiencePresets[0]
+export function getAmbiencePreset(
+  presetId?: string,
+  additionalPresets: readonly AmbiencePreset[] = [],
+): AmbiencePreset {
+  return additionalPresets.find((preset) => preset.id === presetId)
+    ?? ambiencePresets.find((preset) => preset.id === presetId)
+    ?? ambiencePresets[0]
 }

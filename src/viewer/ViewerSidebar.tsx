@@ -1,15 +1,9 @@
-import type { ChapterSummary } from '../content/types'
-import { ViewerChapterList } from './ViewerChapterList'
 import type { ViewerVolume } from './types'
 
 interface ViewerSidebarProps {
   volumes: readonly ViewerVolume[]
   selectedVolumeId: string | null
-  chapters: readonly ChapterSummary[]
-  chapterMessage: string
-  lastReadChapterId: string | null
   onSelectVolume: (volumeId: string) => void
-  onOpenChapter: (chapterId: string) => void
 }
 
 function volumeStatus(volume: ViewerVolume): string {
@@ -19,14 +13,8 @@ function volumeStatus(volume: ViewerVolume): string {
 export function ViewerSidebar({
   volumes,
   selectedVolumeId,
-  chapters,
-  chapterMessage,
-  lastReadChapterId,
   onSelectVolume,
-  onOpenChapter,
 }: ViewerSidebarProps) {
-  const selectedVolume = volumes.find((volume) => volume.id === selectedVolumeId) ?? null
-
   return (
     <aside className="viewer-sidebar" aria-label="Navegación del archivo">
       <div className="viewer-sidebar__brand">
@@ -67,15 +55,6 @@ export function ViewerSidebar({
         </div>
       </section>
 
-      <section className="viewer-sidebar__section viewer-sidebar__chapters" aria-labelledby="sidebar-chapters-title">
-        <h2 id="sidebar-chapters-title">Capítulos</h2>
-        <ViewerChapterList
-          chapters={chapters}
-          emptyMessage={selectedVolume === null ? 'Selecciona un volumen' : chapterMessage}
-          lastReadChapterId={lastReadChapterId}
-          onOpenChapter={onOpenChapter}
-        />
-      </section>
     </aside>
   )
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { AmbientBackground } from '../ambience/AmbientBackground'
 import { getAmbiencePreset } from '../ambience/presets'
+import type { AmbiencePreset } from '../ambience/types'
 import { ChapterDrawer } from '../chapters/ChapterDrawer'
 import type { Book, Chapter, Scene, SceneIntroduction } from '../content/types'
 import { ReaderSettings } from '../settings/ReaderSettings'
@@ -28,6 +29,7 @@ interface ReaderProps {
   book: Book
   chapter: Chapter
   speakerColors?: Readonly<Record<string, string>>
+  ambiencePresets?: readonly AmbiencePreset[]
   preferences: ReaderPreferences
   onPreferencesChange: (changes: Partial<ReaderPreferences>) => void
   onChapterSelect: (chapterId: string) => void
@@ -61,6 +63,7 @@ export function Reader({
   book,
   chapter,
   speakerColors,
+  ambiencePresets,
   preferences,
   onPreferencesChange,
   onChapterSelect,
@@ -89,6 +92,7 @@ export function Reader({
     [chapter, pages, safeCurrentIndex],
   )
   const [openDrawer, setOpenDrawer] = useState<DrawerName>(null)
+  const [isPagePickerOpen, setIsPagePickerOpen] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const [transitionClass, setTransitionClass] = useState<TransitionClass>('')
   const [sceneIntroduction, setSceneIntroduction] = useState<SceneIntroduction | null>(null)
@@ -113,9 +117,14 @@ export function Reader({
   } : null)
 
   const isDrawerOpen = openDrawer !== null
+  const isOverlayOpen = isDrawerOpen || isPagePickerOpen
   const reducedMotion = preferences.reducedMotion || systemReducedMotion
-  const { areControlsVisible, showControls } = useControlsVisibility({ paused: isDrawerOpen })
+  const { areControlsVisible, showControls } = useControlsVisibility({ paused: isOverlayOpen })
   const closeDrawers = useCallback(() => setOpenDrawer(null), [])
+  const closeOverlays = useCallback(() => {
+    setOpenDrawer(null)
+    setIsPagePickerOpen(false)
+  }, [])
 
   useLayoutEffect(() => {
     if (pages.length === 0) return
@@ -131,6 +140,13 @@ export function Reader({
       anchoredIndex = pages.findIndex((page) => (
         page.chapterId === anchor.chapterId && page.fragments.some((fragment) => (
           fragment.sceneId === anchor.sceneId && fragment.sourceBlockId === anchor.blockId
+        ))
+      ))
+    }
+    if (anchoredIndex < 0 && anchor) {
+      anchoredIndex = pages.findIndex((page) => (
+        page.chapterId === anchor.chapterId && page.fragments.some((fragment) => (
+          fragment.sourceBlockId === anchor.blockId
         ))
       ))
     }
@@ -172,13 +188,13 @@ export function Reader({
   const { armedEdge, handleTouchStart, handleTouchEnd } = useReaderNavigation({
     readingRef,
     pageKey: `${currentPage?.model.id ?? 'preparing'}:${paginationRevision}`,
-    enabled: currentPage !== null && !isDrawerOpen && !isTransitioning && !isRepaginating,
+    enabled: currentPage !== null && !isOverlayOpen && !isTransitioning && !isRepaginating,
     wheelNavigation: preferences.wheelNavigation,
     canGoNext,
     canGoPrevious,
     onNext: nextPage,
     onPrevious: previousPage,
-    onEscape: closeDrawers,
+    onEscape: closeOverlays,
     onInteraction: showControls,
   })
 
@@ -250,8 +266,8 @@ export function Reader({
   }, [])
 
   const currentPreset = useMemo(
-    () => getAmbiencePreset(currentPage?.scene.ambience?.presetId),
-    [currentPage?.scene.ambience?.presetId],
+    () => getAmbiencePreset(currentPage?.scene.ambience?.presetId, ambiencePresets),
+    [ambiencePresets, currentPage?.scene.ambience?.presetId],
   )
   const sceneAmbienceIntensity = currentPage?.scene.ambience?.intensity ?? currentPreset.visuals.intensity
   const ambienceIntensity = Math.min(1.2, Math.max(0, preferences.ambienceIntensity * sceneAmbienceIntensity))
@@ -266,6 +282,12 @@ export function Reader({
     if (chapterId !== chapter.id || pages.length === 0) return null
     return Math.round(((safeCurrentIndex + 1) / pages.length) * 100)
   }, [chapter.id, pages.length, safeCurrentIndex])
+
+  const nextChapter = useMemo(() => {
+    const chapters = [...book.chapters].sort((left, right) => left.order - right.order)
+    const currentChapterIndex = chapters.findIndex((candidate) => candidate.id === chapter.id)
+    return currentChapterIndex >= 0 ? chapters[currentChapterIndex + 1] ?? null : null
+  }, [book.chapters, chapter.id])
 
   const selectChapter = useCallback((chapterId: string) => {
     closeDrawers()
@@ -327,6 +349,10 @@ export function Reader({
               readingRef={readingRef}
               transitionClass={transitionClass}
               armedEdge={armedEdge}
+              endAction={safeCurrentIndex === pages.length - 1 ? {
+                label: nextChapter ? 'Cambiar de capítulo' : 'Volver a biblioteca',
+                onActivate: nextChapter ? () => selectChapter(nextChapter.id) : returnHome,
+              } : undefined}
             />
           ) : (
             <article className="reader-page pagination-preparing" aria-live="polite">
@@ -349,10 +375,22 @@ export function Reader({
         pageCount={pages.length}
         controlsVisible={areControlsVisible}
         isTransitioning={isTransitioning || isRepaginating || isPreparing}
+        isPagePickerOpen={isPagePickerOpen}
+        onPagePickerOpenChange={(isOpen) => {
+          if (isOpen) setOpenDrawer(null)
+          setIsPagePickerOpen(isOpen)
+        }}
+        onGoToPage={navigateTo}
         onNext={nextPage}
         onPrevious={previousPage}
-        onOpenChapters={() => setOpenDrawer('chapters')}
-        onOpenSettings={() => setOpenDrawer('settings')}
+        onOpenChapters={() => {
+          setIsPagePickerOpen(false)
+          setOpenDrawer('chapters')
+        }}
+        onOpenSettings={() => {
+          setIsPagePickerOpen(false)
+          setOpenDrawer('settings')
+        }}
       />
 
       <div className={`scene-overlay${sceneIntroduction ? ' scene-overlay--visible' : ''}`} aria-hidden="true">

@@ -15,10 +15,14 @@ interface ReaderPageProps {
   transitionClass?: string
   armedEdge?: ArmedEdge
   measurement?: boolean
+  endAction?: {
+    label: string
+    onActivate: () => void
+  }
 }
 
 const timeLabels: Readonly<Record<string, string>> = {
-  day: 'D\u00eda', sunset: 'Atardecer', night: 'Noche', dawn: 'Amanecer', unknown: 'Hora desconocida',
+  day: 'D\u00eda', afternoon: 'Tarde', sunset: 'Atardecer', dusk: 'Crep\u00fasculo', night: 'Noche', dawn: 'Amanecer', unknown: 'Hora desconocida',
 }
 
 export function ReaderPage({
@@ -32,6 +36,7 @@ export function ReaderPage({
   transitionClass = '',
   armedEdge = null,
   measurement = false,
+  endAction,
 }: ReaderPageProps) {
   const timeLabel = timeLabels[scene.time] ?? scene.time
   const sceneLabel = `${scene.location.detail ?? scene.location.label} \u00b7 ${timeLabel}`
@@ -66,7 +71,11 @@ export function ReaderPage({
 
         <footer className="reader-page__footer">
           <span>{scene.location.label}</span>
-          <span>P&aacute;gina {pageNumber}</span>
+          {endAction ? (
+            <button className="reader-page__end-action" type="button" onClick={endAction.onActivate}>
+              {endAction.label}
+            </button>
+          ) : <span>P&aacute;gina {pageNumber}</span>}
           <span>{timeLabel}</span>
         </footer>
       </div>

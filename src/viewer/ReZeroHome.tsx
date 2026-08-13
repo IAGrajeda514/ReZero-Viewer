@@ -108,11 +108,7 @@ export function ReZeroHome({
         <ViewerSidebar
           volumes={sortedVolumes}
           selectedVolumeId={selectedVolume?.id ?? null}
-          chapters={chapters}
-          chapterMessage={chapterMessage}
-          lastReadChapterId={lastReadChapterId}
           onSelectVolume={setSelectedVolumeId}
-          onOpenChapter={onOpenChapter}
         />
 
         <div className="viewer-home__workspace">
@@ -164,21 +160,36 @@ export function ReZeroHome({
                   </p>
                 )}
 
-                <button
-                  className="archive-volume__action"
-                  type="button"
-                  disabled={actionDisabled}
-                  onClick={() => {
-                    if (!selectedVolume || actionDisabled) return
-                    if (selectedLoadStatus === 'ready' && lastReadChapterId) {
-                      onOpenChapter(lastReadChapterId)
-                      return
-                    }
-                    onOpenVolume(selectedVolume)
-                  }}
-                >
-                  {actionLabel}
-                </button>
+                {selectedLoadStatus === 'ready' ? (
+                  <section className="archive-volume__chapters" aria-labelledby="volume-chapters-title">
+                    <div className="archive-volume__chapters-heading">
+                      <h3 id="volume-chapters-title">Capítulos</h3>
+                      {lastReadChapterId !== null && (
+                        <button type="button" onClick={() => onOpenChapter(lastReadChapterId)}>
+                          Continuar
+                        </button>
+                      )}
+                    </div>
+                    <ViewerChapterList
+                      chapters={chapters}
+                      emptyMessage={chapterMessage}
+                      lastReadChapterId={lastReadChapterId}
+                      onOpenChapter={onOpenChapter}
+                    />
+                  </section>
+                ) : (
+                  <button
+                    className="archive-volume__action"
+                    type="button"
+                    disabled={actionDisabled}
+                    onClick={() => {
+                      if (!selectedVolume || actionDisabled) return
+                      onOpenVolume(selectedVolume)
+                    }}
+                  >
+                    {actionLabel}
+                  </button>
+                )}
               </div>
             </article>
           ) : (
@@ -187,15 +198,6 @@ export function ReZeroHome({
             </section>
           )}
 
-          <section className="viewer-home__mobile-chapters" aria-labelledby="mobile-chapters-title">
-            <h2 id="mobile-chapters-title">Capítulos</h2>
-            <ViewerChapterList
-              chapters={chapters}
-              emptyMessage={chapterMessage}
-              lastReadChapterId={lastReadChapterId}
-              onOpenChapter={onOpenChapter}
-            />
-          </section>
         </div>
       </div>
     </main>
